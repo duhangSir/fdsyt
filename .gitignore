@@ -1,0 +1,8 @@
+unpackage
+.vscode
+node_modules
+md-doc
+# manifest.json
+dist.zip
+dist
+*.zip
