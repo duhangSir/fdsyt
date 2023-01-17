@@ -7,6 +7,9 @@
                 <span class="font_14 color_hui ml_1">最新更新时间:{{ newDate }}</span>
             </div>
             <div class="flex">
+                <div class="mr_1">
+                    <el-button @click="dialogVisible = true">导出数据</el-button>
+                </div>
                 <div style="background-color:#eef0f2;border-radius: 0.25rem"
                     class="flex juction_content align_items mr_2">
                     <input type="text" placeholder="请输入要搜索的商品名称" v-model.trim="searchText"
@@ -51,6 +54,33 @@
             </el-pagination>
             <div class="GO">GO</div>
         </div>
+        <el-dialog title="出库报表" :visible.sync="dialogVisible" width="30%">
+            <!-- <span>这是一段信息</span> -->
+            <div class="flex">
+                <div class="mr_1">
+                    年份：
+                    <el-date-picker style="width:1.5rem" v-model="excelYearData" type="year" align="center"
+                        placeholder="选择年" @change="searchExcelYear" format="yyyy年" clear-icon="false">
+                    </el-date-picker>
+                </div>
+                <div>
+                    月份：
+                    <el-date-picker style="width:1.5rem" v-model="excelMonthData" type="month" align="center"
+                        @change="searchExcelMonth" placeholder="选择月" format="M月份" clear-icon="false">
+                    </el-date-picker>
+                </div>
+            </div>
+            <div class="mt_1 flex align_items">导出数量：<el-input v-model="excelInput" class="class"
+                    style="width:2rem"></el-input></div>
+            <span slot="footer" class="dialog-footer flex" style="justify-content: space-between;">
+                <!-- <el-button @click="dialogVisible = false">取 消</el-button> -->
+                <el-button @click="excelButton">确 定</el-button>
+                <download-excel class="export-excel-wrapper" :data="excelData" :fields="json_fields" type="xls"
+                    v-if="excelShow" worksheet="My Worksheet" name="入库报表">
+                    <el-button @click="excelShowButton">导出数据</el-button>
+                </download-excel>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -68,7 +98,14 @@ export default {
             monthData: new Date(),
             month: '',
             year: '',
-            searchText: ''
+            searchText: '',
+            dialogVisible: false,
+            excelInput: 0,
+            excelShow: false,
+            excelData: [],
+            excelInput: 0,
+            excelYearData: new Date(),
+            excelMonthData: new Date(),
         }
     },
     created() {
@@ -76,6 +113,63 @@ export default {
         this.getGoodsInOutStatistics()
     },
     methods: {
+        excelShowButton() {
+            const json_fields = [
+                {
+                    title: "商品图",
+                    key: "images",
+                    type: "image",
+                    width: 100,
+                    height: 100
+                },
+                {
+                    title: "商品名称",
+                    key: "name",
+                    type: "text"
+                },
+                {
+                    title: "数量",
+                    key: "num",
+                    type: "text"
+                },
+                {
+                    title: "单价(元)",
+                    key: "price",
+                    type: "text"
+                },
+            ]
+            this.$JsonExcel(json_fields, this.excelData, '出库报表')
+            setTimeout(() => {
+                this.excelShow = false
+            }, 2000);
+        },
+        excelButton() {
+            if (this.excelInput > 999) {
+                this.$Notify('导出数量不能超过1000')
+                return
+            }
+            let myreg = /^([0-9]{1,}[.][0-9]*)$/;
+            let myreg2 = /^([0-9]{1,})$/;
+            if (!myreg.test(this.excelInput) && !myreg2.test(this.excelInput)) {
+                this.excelInput = 0;
+                this.$Notify('请输入正确的导出数量')
+                return
+            }
+            const obj = {
+                year: this.yearData.getFullYear(),
+                month: (this.monthData.getMonth() + 1).toString().padStart(2, 0),
+                page: 1,
+                pageSize: this.excelInput,
+                type: 2
+            }
+            getGoodsInOutStatistics(obj).then((item) => {
+                this.excelData = item.data.list
+                this.excelData.forEach((item, index) => {
+                    item.index = index + 1
+                })
+                this.excelShow = true
+            })
+        },
         currentChange(currentPage) {
             this.currentPage = currentPage
             this.getGoodsInOutStatistics()
@@ -106,9 +200,6 @@ export default {
                     this.total = item.data.count
                 }
                 this.newDate = item.data.cache_date
-                item.data.list.forEach((item) => {
-                    item.images = process.env.VUE_APP_BASE_API + item.images
-                })
                 this.tableData = item.data.list
             })
         }

@@ -6,7 +6,16 @@ import components from './config/components.js';
 import store from './config/store/index.js'
 import './index.css'
 import { MessageBox } from 'element-ui'
+
+// import JsonExcel from 'vue-json-excel'
+import JsonExcel from 'js-table2excel'
+import { Notify, Toast } from "vant";
+// Vue.component('downloadExcel', JsonExcel)
+
 Vue.prototype.$confirm = MessageBox.confirm;
+Vue.prototype.$JsonExcel = JsonExcel;
+Vue.prototype.$Notify = Notify;
+Vue.prototype.$Toast = Toast;
 import {
   router
 } from "./config/router/index";

@@ -84,3 +84,18 @@ export const getEverydayList = (data) => {
 export const getYearReportForm = (data) => {
 	return req.get('addons/litestore/api.Cashiertotal/getYearReportForm', data)
 }
+// 取消订单
+export const cancelCashierOrder = (data) => {
+	return req.get('addons/litestore/api.order/cancelCashierOrder', data)
+}
+// 购物车 清空所有
+export const clearAll = (params) => {
+	return req.post('addons/litestore/api.Cashiercart/clearAll', params)
+}
+export const getUserInfo = (data) => {
+	return req.get('addons/litestore/api.Cashiercart/getUserInfo', data)
+}
+// 读取用户积分
+export const getUserScore = (data) => {
+	return req.get('addons/litestore/api.Cashiercart/getUserScore', data)
+}

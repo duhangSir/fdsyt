@@ -1,26 +1,29 @@
 <template>
-    <div class="DataMana">
-        <!-- 数据管理 -->
-        <div style="width: 100%;height: 0.5rem;padding: 0.1rem 0;margin:0 auto"
-            class="bg_fff flex space_between align_items">
-            <div class="flex space_between align_items" style="padding: 0 0.2rem;">
-                <img src="../assets/dataManage.png" alt="">
-                <span class="ml_1">数据管理</span>
-            </div>
-            <div>
-                <div class="mr_1">
-                    <button class="button" v-for="(item, index) in buttons" :key="index" type="info" plain
-                        :class="{ 'active': item.type == buttonType }" @click="reportForm(item.type)">{{ item.title }}
-                    </button>
+    <div style="background-color: #dbdddf;">
+        <div class="DataMana">
+            <!-- 数据管理 -->
+            <div style="width: 100%;height: 0.5rem;padding: 0.1rem 0;margin:0 auto"
+                class="bg_fff flex space_between align_items">
+                <div class="flex space_between align_items" style="padding: 0 0.2rem;">
+                    <img src="../assets/dataManage.png" alt="">
+                    <span class="ml_1">数据管理</span>
+                </div>
+                <div>
+                    <div class="mr_1">
+                        <button class="button" v-for="(item, index) in buttons" :key="index" type="info" plain
+                            :class="{ 'active': item.type == buttonType }" @click="reportForm(item.type)">{{ item.title
+                            }}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div style="width: 100%;height: 80%;" class="mt_1 flex zishuju">
-            <ManageIndex v-if="buttonType == 'homePage'" @viewMore="viewMore"></ManageIndex>
-            <ConsumerData v-else-if="buttonType == 'MorehomePage'"></ConsumerData>
-            <enterReport v-else-if="buttonType == 'enter'"></enterReport>
-            <outReport v-else-if="buttonType == 'out'"></outReport>
-            <achievementReport v-else-if="buttonType == 'achievement'"></achievementReport>
+            <div style="width: 100%;height: 80%;" class="mt_1 flex zishuju">
+                <ManageIndex v-if="buttonType == 'homePage'" @viewMore="viewMore"></ManageIndex>
+                <ConsumerData v-else-if="buttonType == 'MorehomePage'"></ConsumerData>
+                <enterReport v-else-if="buttonType == 'enter'"></enterReport>
+                <outReport v-else-if="buttonType == 'out'"></outReport>
+                <achievementReport v-else-if="buttonType == 'achievement'"></achievementReport>
+            </div>
         </div>
     </div>
 </template>

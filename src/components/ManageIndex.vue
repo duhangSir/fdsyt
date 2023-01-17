@@ -21,7 +21,8 @@
                             <div v-else
                                 style="background-color: #e6e6e6;padding: 0 0.05rem;border-radius: 0.1rem;color: #7e7e7e;">
                                 <img src="../assets/decline.png" alt="">
-                                <span style="font-weight: bold;">{{ parseInt(todayMoney.today - todayMoney.yesterday)
+                                <span style="font-weight: bold;">{{
+                                    parseInt(todayMoney.today - todayMoney.yesterday)
                                 }}</span> 元
                             </div>
                         </div>
@@ -44,14 +45,16 @@
                             <div v-if="(todayMoney.this_month - todayMoney.pre_month) < 0"
                                 style="background-color: #e6e6e6;padding: 0 0.05rem;border-radius: 0.1rem;color: #7e7e7e;">
                                 <img src="../assets/decline.png" alt="">
-                                <span style="font-weight: bold;">{{ parseInt(todayMoney.this_month -
+                                <span style="font-weight: bold;">{{
+                                    parseInt(todayMoney.this_month -
                                         todayMoney.pre_month)
                                 }}</span> 元
                             </div>
                             <div v-else
                                 style="background-color: #ebffea;padding: 0 0.05rem;border-radius: 0.1rem;color: #07d700;">
                                 <img src="../assets/increase.png" alt="">
-                                +<span style="font-weight: bold;">{{ parseInt(todayMoney.this_month -
+                                +<span style="font-weight: bold;">{{
+                                    parseInt(todayMoney.this_month -
                                         todayMoney.pre_month)
                                 }}</span> 元
                             </div>
@@ -95,13 +98,15 @@
                         <div class="sign mx_1"></div>
                         本月消费者排名
                     </div>
+                    <el-button @click="dialogVisible = true">导出数据</el-button>
                     <div style="color:#808080;font-size: 0.14rem;cursor:pointer" class="flex align_items"
                         @click="viewMore">查看更多 <div class="arrow_right"></div>
                     </div>
                 </div>
                 <div>
-                    <el-table :data="tableData" stripe style="width: 100%;height: 6.6rem;" class="table"
-                        :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ 'text-align': 'center' }">
+                    <el-table :data="tableData" stripe style="width: 100%;height: 6.6rem;overflow-y: scroll;"
+                        class="table" :header-cell-style="{ 'text-align': 'center' }"
+                        :cell-style="{ 'text-align': 'center' }">
                         <el-table-column type="index" label="排名">
                         </el-table-column>
                         <el-table-column prop="user_id" label="用户ID">
@@ -114,6 +119,33 @@
                 </div>
             </div>
         </div>
+        <el-dialog title="消费者排名" :visible.sync="dialogVisible" width="30%">
+            <!-- <span>这是一段信息</span> -->
+            <div class="flex">
+                <div class="mr_1">
+                    年份：
+                    <el-date-picker style="width:1.5rem" v-model="yearData" type="year" align="center" placeholder="选择年"
+                        @change="searchYear" format="yyyy年" clear-icon="false">
+                    </el-date-picker>
+                </div>
+                <div>
+                    月份：
+                    <el-date-picker style="width:1.5rem" v-model="monthData" type="month" align="center"
+                        @change="searchMonth" placeholder="选择月" format="M月份" clear-icon="false">
+                    </el-date-picker>
+                </div>
+            </div>
+            <div class="mt_1 flex align_items">导出数量：<el-input v-model="excelInput" class="class"
+                    style="width:2rem"></el-input></div>
+            <span slot="footer" class="dialog-footer flex" style="justify-content: space-between;">
+                <!-- <el-button @click="dialogVisible = false">取 消</el-button> -->
+                <el-button @click="excelButton">确 定</el-button>
+                <!-- <download-excel class="export-excel-wrapper" :data="excelData" :fields="json_fields" type="xls"
+                    v-if="excelShow" worksheet="My Worksheet" name="消费者排名"> -->
+                <el-button @click="excelShowButton" v-if="excelShow">导出数据</el-button>
+                <!-- </download-excel> -->
+            </span>
+        </el-dialog>
 
     </div>
 </template>
@@ -132,16 +164,23 @@ export default {
             newDate: '',
             minData: new Date(1577808000),
             newMonth: '',
+            dialogVisible: false,
             input2: '',
             date: '',
             show: false,
+            yearData: new Date(),
+            monthData: new Date(),
             // 用户消费排行榜
+            excelInput: 0,
             tableData: [],
             echartsData: [],
             echartsX: [],
             echartsSeries: [],
             startTime: '',
-            endTime: ''
+            endTime: '',
+            excelShow: false,
+            excelData: [],
+
         }
     },
     mounted() {
@@ -216,6 +255,66 @@ export default {
             };
             myChart.setOption(option);
         },
+        excelShowButton() {
+            var that = this
+            const json_fields = [
+                {
+                    title: "排名",
+                    key: "index",
+                    type: "text"
+                },
+                {
+                    title: "用户ID",
+                    key: "user_id",
+                    type: "text"
+                },
+                {
+                    title: "姓名",
+                    key: "nickname",
+                    type: "text"
+                },
+                {
+                    title: "总金额",
+                    key: "total_price",
+                    type: "text"
+                },
+            ]
+            this.$JsonExcel(json_fields, this.excelData, '消费者排名')
+            setTimeout(() => {
+                that.excelShow = false
+            }, 2000);
+        },
+        searchYear() {
+            console.log(this.yearData.getFullYear())
+        },
+        searchMonth() {
+            console.log((this.monthData.getMonth() + 1).toString().padStart(2, 0))
+        },
+        excelButton() {
+            if (this.excelInput > 999) {
+                this.$Notify('导出数量不能超过1000')
+                return
+            }
+            let myreg = /^([0-9]{1,}[.][0-9]*)$/;
+            let myreg2 = /^([0-9]{1,})$/;
+            if (!myreg.test(this.excelInput) && !myreg2.test(this.excelInput)) {
+                this.excelInput = 0;
+                this.$Notify('请输入正确的导出数量')
+                return
+            }
+            const obj = {
+                month: this.yearData.getFullYear() + (this.monthData.getMonth() + 1).toString().padStart(2, 0),
+                page: 1,
+                pageSize: this.excelInput
+            }
+            getAppointMonthUserConsumeRank(obj).then((item) => {
+                this.excelData = item.data.list
+                this.excelData.forEach((item, index) => {
+                    item.index = index + 1
+                })
+                this.excelShow = true
+            })
+        },
         formatDate(date) {
             return `${date.getMonth() + 1}/${date.getDate()}`;
         },
@@ -237,6 +336,9 @@ export default {
         getAppointMonthUserConsumeRank() {
             getAppointMonthUserConsumeRank({ page: 1, pageSize: 10 }).then((item) => {
                 this.tableData = item.data.list
+                this.tableData.forEach((item, index) => {
+                    item.index = index + 1
+                })
             })
         },
         // 获取 今日/本月的数据
@@ -292,17 +394,35 @@ export default {
 </script>
 <style lang="less" scoped>
 @media (max-height: 800px) {
-    #echarts{
-        width: 900px!important;
-        height: 300px!important;
+    #echarts {
+        width: 900px !important;
+        height: 300px !important;
     }
-    .table{
-        height: 4rem!important;
+
+    .table {
+        height: 4rem !important;
     }
-    .orderPay{
+
+    .orderPay {
         height: 105%;
     }
 }
+
+
+
+// /deep/ .el-input__prefix {
+//     position: absolute;
+//     top: 50%;
+//     transform: translate(0, -50%) !important;
+//     cursor: pointer;
+// }
+
+// /deep/ .el-input__suffix {
+//     position: absolute;
+//     top: 50%;
+//     transform: translate(0, -50%) !important;
+//     cursor: pointer;
+// }
 
 .sign {
     width: 0.04rem;
@@ -315,17 +435,30 @@ export default {
     margin: 0;
 }
 
-/deep/ .el-input__prefix {
+// /deep/ .el-input__prefix {
+//     position: absolute;
+//     top: 50%;
+//     transform: translate(0, -50%)!important;
+//     cursor: pointer;
+// }
+
+// /deep/ .el-input__suffix {
+//     position: absolute;
+//     top: 50%;
+//     transform: translate(0, -50%)!important;
+//     cursor: pointer;
+// }
+/deep/ .el-icon-date:before {
     position: absolute;
     top: 50%;
-    transform: translate(0, -50%);
+    transform: translate(-50%, -80%) !important;
     cursor: pointer;
 }
 
-/deep/ .el-input__suffix {
+/deep/ .class .el-input__suffix {
     position: absolute;
     top: 50%;
-    transform: translate(0, -50%);
+    transform: translate(0%, -50%) !important;
     cursor: pointer;
 }
 </style>

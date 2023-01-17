@@ -1,6 +1,7 @@
 import instance from "./intercept";
 import { AxiosRequest, CustomResponse } from "./types";
 import { Notify, Toast } from "vant";
+import { Message } from 'element-ui'
 import cookie from "vue-cookie";
 class Abstract {
   // 外部传入的baseUrl
@@ -26,8 +27,8 @@ class Abstract {
     // url = getUrl(_url[0], _url[1]);
     // let user = cookie.get("userInfo") || "{}";
     if(JSON.parse(cookie.get("userInfo") || "{}").token || "")
+   
     headers.token = JSON.parse(cookie.get("userInfo") || "{}").token || "";
-
     return new Promise((resolve, reject) => {
       instance({
         baseURL,

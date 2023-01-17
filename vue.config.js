@@ -38,7 +38,7 @@ module.exports = {
   },
   chainWebpack: config => {
     console.log('config：' + process.env.NODE_ENV);
-    if (process.env.NODE_ENV == 'test') {}
+    if (process.env.NODE_ENV == 'test') { }
   },
   css: {
     extract: true,

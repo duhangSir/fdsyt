@@ -29,8 +29,8 @@
 					<el-empty style="margin: 1rem;" :image-size="200" v-if="stock_shopList.length == 0"></el-empty>
 					<div class="stock_shopAll saoma_stock_shopAll"
 						style="padding: 0.1rem 0.1rem 0 0;justify-content: start;overflow:auto;">
-						<div class="stock_shop" style="margin:0.1rem 0.2rem;" v-for="(item) in stock_shopList"
-							:key="item.spec[0].goods_id">
+						<div class="stock_shop" style="margin:0.1rem 0.2rem;padding: 0.2rem 0;box-sizing: content-box;"
+							v-for="(item) in stock_shopList" :key="item.spec[0].goods_id">
 							<div class="stock_shop_img">
 								<img class="saoma_stock_img" :src="item.image" style="width: 90%;height:70%">
 							</div>
@@ -38,13 +38,18 @@
 								<div class="saoma_stock_name"
 									style="overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;">
 									{{ item.goods_name }}</div>
+								<div style="font-size: 0.14rem;color: #8d8d8d;">
+									商品编码:{{ item.spec[0].goods_no }}
+								</div>
 								<div class="saoma_stock_Egou" style="margin: 0.1rem 0;font-size: 0.14rem;"
 									v-if="item.is_cashier_goods == '1'"><span
-										style="color: #8d8d8d;font-size: 0.12rem">E购月卡</span>{{ item.cashier_goods_price
+										style="color: #8d8d8d;font-size: 0.12rem">E购月卡</span>{{
+											item.cashier_goods_price
 										}}
 								</div>
 								<div class="saoma_stock_Egou" style="margin: 0.1rem 0;font-size: 0.14rem;" v-else><span
-										style="color: #8d8d8d;font-size: 0.12rem"></span>￥{{ item.spec[0].goods_price
+										style="color: #8d8d8d;font-size: 0.12rem"></span>￥{{
+											item.spec[0].goods_price
 										}}+{{ item.score }}积分
 								</div>
 								<div>
@@ -88,7 +93,7 @@
 											{{ item.goods_name }}</div>
 										<div class="saoma_stock_Egou" style="margin: 0.1rem 0;font-size: 0.14rem;"><span
 												style="color: #8d8d8d;font-size: 0.12rem">E购月卡</span>{{
-														item.spec[0].goods_price
+													item.spec[0].goods_price
 												}}
 										</div>
 										<div>
@@ -126,22 +131,50 @@
 			<el-tab-pane name="a"><span slot="label"><i class="el-icon-postcard"></i>绑定会员卡</span>
 				<div class="huiyuan"
 					style="width: 11.4rem;height: 6.4rem;background-color: #fff;margin: 0 auto;border-radius: 0.1rem;margin-top: 0.7rem;padding: 0.3rem;">
-					<div style="margin-bottom: 0.6rem;height: 0.4rem;">绑定会员卡号</div>
-					<el-form ref="card_form" :model="card_form" label-width="0.8rem"
+					<div style="margin-bottom: 0.6rem;height: 0.1rem;">绑定会员卡号</div>
+					<el-form :inline="true" ref="card_form" :model="card_form" label-width="0.8rem"
 						style="width: 70%;margin: 0 auto;height: calc(100% - 2rem);">
-						<el-form-item label="用户id" style="font-weight: bold;">
-							<el-input v-model="card_form.user_id"></el-input>
+						<el-form-item label="ID号" style="font-weight: bold;">
+							<el-input v-model="card_form.user_id" style=""></el-input>
 						</el-form-item>
-						<el-form-item label="会员ic卡号" style="font-weight: bold;">
+						<template v-if="formShow">
+							<el-form-item label="姓名" style="font-weight: bold;">
+								<el-input v-model="card_form.nickname"></el-input>
+							</el-form-item>
+							<el-form-item label="手机号" style="font-weight: bold;">
+								<el-input v-model="card_form.mobile"></el-input>
+							</el-form-item>
+							<el-form-item label="E购月卡" style="font-weight: bold;">
+								<el-input v-model="card_form.egou"></el-input>
+							</el-form-item>
+							<el-form-item label="积分" style="font-weight: bold;">
+								<el-input v-model="card_form.score"></el-input>
+							</el-form-item>
+							<el-form-item label="IC卡号" style="font-weight: bold;">
+								<el-input v-model="card_form.ic"></el-input>
+							</el-form-item>
+						</template>
+						<!-- <el-form-item label="会员ic卡号" style="font-weight: bold;">
 							<el-input v-model="card_form.ic"></el-input>
-						</el-form-item>
+						</el-form-item> -->
 					</el-form>
 					<!-- <span slot="footer" class="dialog-footer"> -->
-					<div style="margin: 0 auto;width: 2rem;">
+					<!-- <el-button class="ml_1" type="primary" @click="getUserInfoButton">确认</el-button> -->
+					<div style="margin: 0 auto;width: 2rem;" v-if="!formShow">
+						<el-button type="primary" @click="getUserInfoButton" style="width: 2rem;height: 0.5rem;">确定
+						</el-button>
+					</div>
+					<div style="margin: 0 auto;width: 5rem;" v-if="formShow">
 						<el-button type="primary" @click="card_submit" style="width: 2rem;height: 0.5rem;">提交
+						</el-button>
+						<el-button @click="card_reset" style="width: 2rem;height: 0.5rem;">重置
 						</el-button>
 					</div>
 				</div>
+				<!-- <download-excel class="export-excel-wrapper" :data="json_data" :fields="json_fields" type="xls"
+					worksheet="My Worksheet" name="用户信息">
+					<el-button>导出EXCEL</el-button>
+				</download-excel> -->
 			</el-tab-pane>
 			<el-tab-pane name="code"><span slot="label"><i class="el-icon-full-screen"></i>扫码</span>
 				<div class="saoma"
@@ -166,18 +199,18 @@
 											<span v-if="tit.is_cashier_goods == 0">
 												<span
 													style="color: red;font-weight: 600;font-size: 0.18rem;margin-right: 0.10rem;">￥{{
-															parseInt(tit.goods_price)
+														parseInt(tit.goods_price - tit.score)
 													}}+{{ tit.score }}积分</span>
 											</span>
 											<span v-if="tit.is_cashier_goods == 1">
 												月卡兑换<span
 													style="color: red;font-weight: 600;font-size: 0.18rem;margin-right: 0.10rem;">￥{{
-															parseInt(tit.cashier_goods_price)
+														parseInt(tit.cashier_goods_price)
 													}}</span>
 											</span>
 											<span
 												style="color: red;font-weight: 600;font-size: 0.18rem;margin-right: 0.05rem;">*{{
-														tit.total_num
+													tit.total_num
 												}}</span>
 										</div>
 									</div>
@@ -187,7 +220,7 @@
 					</div>
 					<div class="saoma"
 						style="width: 5.2rem;height: 6.4rem;display: inline-block;vertical-align: bottom;">
-						<div
+						<div class="saoma_add_tianjia"
 							style="text-align: center;font-size: 0.22rem;border-bottom: 0.02rem solid red;width: 2rem;margin: 0 auto;padding: 0.1rem;margin-top: 0.5rem;">
 							输入条码添加
 						</div>
@@ -199,6 +232,10 @@
 						<el-button @click="Cashiercartadd()" id="Button"
 							style="width: 3.5rem;display: block;margin: 0 auto;margin-top: 0.3rem;font-size: 0.16rem;"
 							type="primary" round>确认添加</el-button>
+						<el-button @click="deleteCashiercart()" id="Button"
+							style="width: 3.5rem;display: block;margin: 0 auto;margin-top: 0.3rem;font-size: 0.16rem;"
+							type="warning" round>清空购物车<span
+								style="font-size:0.12rem">(---建议添加购物车出现bug调用)</span></el-button>
 						<el-button @click="hhhh()"
 							style="width: 3.5rem;display: block;margin: 0 auto;margin-top: 0.3rem;font-size: 0.16rem;background-color: #ffe3e3;color: #f44444;"
 							type="primary" round>全部添加到购物车（商品种类数量）</el-button>
@@ -210,14 +247,18 @@
 				<div class="ordertab">
 					<div style="overflow-y: auto;width: 100%;height: 90%;" v-if="detailedShow">
 						<div v-for="(item, index) in tableData" :key="index" style="overflow-x: auto;">
-							<el-table :data="item.goods.slice(0, 1)" :border="true" height="135" style="width: 100%;">
+							<el-table :data="item.goods.slice(0, 1)" :border="true" height="140" style="width: 100%;">
 								<el-table-column prop="date" width="1100">
 									<template slot="header" slot-scope="scope">
 										{{ order[index].creattime_text }}<span class="taborder">订单号:{{
-												order[index].order_no
+											order[index].order_no
 										}}
+
 											<span class="detailed" @click="detailed(item.goods, index)">详情</span>
-										</span>{{ order[index].pay_status == 10 ? '待支付' : '已完成' }}
+										</span>
+										{{ order[index].pay_status == 10 ? '待支付' : '已完成' }}
+										<el-button v-if="(order[index].pay_status == 10)" @click="cancelOrder(item)"
+											size="mini">取消订单</el-button>
 									</template>
 
 									<template slot-scope="scope">
@@ -228,19 +269,21 @@
 										<!-- 单价：￥{{ scope.row.goods_price }}<span style="margin: 0 0.2rem;">数量：{{
 												scope.row.total_num}}</span>小计：{{ scope.row.total_price }} -->
 										<span v-if="order[index].pay_status == 10">
-											小计：￥{{ order[index].other_pay_info.offline - order[index].score_price
+											小计：￥{{
+												order[index].other_pay_info.offline - order[index].score_price
 											}}+{{ order[index].other_pay_info.score }}积分+{{
-		order[index].other_pay_info.egou
+	order[index].other_pay_info.egou
 }}E购月卡</span>
 										<span v-else-if="order[index].pay_status !== 10">
 											小计：￥
 											<span v-if="order[index].other_pay_info.use_score !== 0">{{
-													order[index].other_pay_info.offline - order[index].score_price
+												order[index].other_pay_info.offline - order[index].score_price
 											}}</span>
-											<span v-else>{{ order[index].other_pay_info.offline
+											<span v-else>{{
+												order[index].other_pay_info.offline
 											}}</span>
 											+{{ order[index].other_pay_info.use_score }}积分+{{
-													order[index].other_pay_info.egou
+												order[index].other_pay_info.egou
 											}}E购月卡
 										</span>
 
@@ -258,10 +301,12 @@
 							<el-table-column prop="date" width="1166">
 								<template slot="header" slot-scope="scope">
 									{{ order[detailedIndex].creattime_text }}<span class="taborder">订单号:{{
-											order[detailedIndex].order_no
+										order[detailedIndex].order_no
 									}}
 										<el-button size="mini" @click="printReceipt(detailedIndex)">打印小票</el-button>
-									</span>{{ order[detailedIndex].pay_status == 10
+									</span>
+									{{
+										order[detailedIndex].pay_status == 10
 											? '待支付' : '已完成'
 									}}
 									<span>E购支付</span>
@@ -275,13 +320,14 @@
 											:src="scope.row.image">{{ scope.row.goods_name }}
 
 									</div>
-									<span v-if="scope.row.is_egou_goods == 0">单价：￥{{ scope.row.goods_price
+									<span v-if="scope.row.is_egou_goods == 0">单价：￥{{
+										scope.row.goods_price
 									}}+{{ order[detailedIndex].other_pay_info.score / scope.row.total_num }}积分<span
 											style="margin: 0 0.2rem;">数量：{{
-													scope.row.total_num
+												scope.row.total_num
 											}}</span>小计：{{ scope.row.total_price }}</span>
 									<span v-else>单价：{{ scope.row.goods_price }}E购月卡<span style="margin: 0 0.2rem;">数量：{{
-											scope.row.total_num
+										scope.row.total_num
 									}}</span>小计：{{ scope.row.total_price }}</span>
 								</template>
 							</el-table-column>
@@ -290,25 +336,25 @@
 					<div class="tabend" v-if="!detailedShow">
 						<span v-if="order[detailedIndex].pay_status == 10">
 							<span>实付：<span class="redstrong">￥{{
-									order[detailedIndex].other_pay_info.offline - order[detailedIndex].score_price
+								order[detailedIndex].other_pay_info.offline - order[detailedIndex].score_price
 							}}
 									+{{ order[detailedIndex].other_pay_info.score }}积分+ {{
-											order[detailedIndex].other_pay_info.egou
+										order[detailedIndex].other_pay_info.egou
 									}}E购月卡</span></span>
 						</span>
 						<span v-else>
 							<span v-if="order[detailedIndex].other_pay_info.use_score == 0">
 								<span>实付：<span class="redstrong">￥{{
-										order[detailedIndex].other_pay_info.offline
+									order[detailedIndex].other_pay_info.offline
 								}}
 										+{{ order[detailedIndex].other_pay_info.use_score }}积分+ {{
-												order[detailedIndex].other_pay_info.egou
+											order[detailedIndex].other_pay_info.egou
 										}}E购月卡</span></span></span>
 							<span v-else>实付：<span class="redstrong">￥{{
-									order[detailedIndex].other_pay_info.offline - order[detailedIndex].score_price
+								order[detailedIndex].other_pay_info.offline - order[detailedIndex].score_price
 							}}
 									+{{ order[detailedIndex].other_pay_info.use_score }}积分+ {{
-											order[detailedIndex].other_pay_info.egou
+										order[detailedIndex].other_pay_info.egou
 									}}E购月卡</span></span>
 						</span>
 					</div>
@@ -328,12 +374,15 @@
 						<el-table-column prop="date" width="1111">
 							<template slot="header" slot-scope="scope">全选<span style="margin: 0 1rem;color: red;"
 									@click="multiDelete()">删除</span>已选商品<span
-									style="color: red;font-size: 0.20rem;font-weight: 600;">{{ selectdata.length
+									style="color: red;font-size: 0.20rem;font-weight: 600;">{{
+										selectdata.length
 									}}</span>件<span style="margin: 0 2rem;">合计：<span
 										style="color: red;font-weight: 600;">
-										￥{{ EgouList.offline_total }}+{{ EgouList.order_total_score }}积分+{{
-												EgouList.egou_total
-										}}E购月卡
+										￥{{ EgouList.offline_total - EgouList.order_total_score }}+{{
+											EgouList.order_total_score
+										}}积分+{{
+	EgouList.egou_total
+}}E购月卡
 									</span></span>
 								<el-button @click="settlement" type="primary">结算</el-button>
 							</template>
@@ -344,12 +393,14 @@
 										style="color:red">是</span>/<span>否</span></div> -->
 								<img style="width: 0.6rem;height: 0.6rem;vertical-align: middle;"
 									:src="scope.row.image">{{ scope.row.goods_name }}<span
-									style="margin-left: 0.5rem;"><span
-										v-if="scope.row.is_cashier_goods == '0'">￥</span>{{
-												parseInt(scope.row.goods_price)
-										}}
+									style="margin-left: 0.5rem;"><span v-if="scope.row.is_cashier_goods == '0'">￥{{
+										parseInt(scope.row.goods_price - scope.row.score)
+									}}</span>
+									<span v-if="scope.row.is_cashier_goods == '1'">{{
+										parseInt(scope.row.cashier_goods_price)
+									}}</span>
 									<span style="color:red;" v-if="scope.row.is_cashier_goods == '0'">+{{
-											scope.row.score
+										scope.row.score
 									}}积分</span>
 									<span v-if="scope.row.is_cashier_goods == '1'" style="color:red;">E购月卡</span>
 								</span>
@@ -357,14 +408,19 @@
 									v-model="scope.row.total_num" @change="handleChange(scope.row)" :min="1"
 									:max="1000">
 								</el-input-number>
-								合计：{{ parseInt(scope.row.total_price) }}<span v-if="scope.row.is_cashier_goods == 0">+{{
-										scope.row.total_score
-								}}积分</span> <span style="margin-left: 1rem;color: red;"
+								合计：<span v-if="scope.row.is_cashier_goods == 0">{{
+									parseInt(scope.row.total_price -
+										scope.row.total_score)
+								}}+{{ scope.row.total_score }}积分</span>
+								<span v-if="scope.row.is_cashier_goods == 1">{{
+									parseInt(scope.row.total_price)
+								}}</span>
+								<span style="margin-left: 1rem;color: red;"
 									@click="Cashiercartdelete(scope.row.goods_id, scope.row.goods_sku_id)">删除</span>
 							</template>
 						</el-table-column>
 					</el-table>
-					<div style="text-align: center;display: flex;;margin-top: 1rem;" v-show="show" class="saoma_vip">
+					<div style="text-align: center;display: flex;;margin-top: 1rem;" v-if="show" class="saoma_vip">
 						<div style="flex: 1;">
 							<span style="font-size: 0.2rem;font-weight: 600;">请输入会员卡编号完成付款</span>
 							<el-input class="saoma_vipcode"
@@ -388,15 +444,33 @@
 						</div>
 					</div>
 					<el-dialog style="margin-top: 1rem;" title="请输入支付密码" :visible.sync="passworddialogVisible"
-						width="30%" :before-close="handleClose">
+						width="40%" :before-close="handleClose">
 						<div style="display:flex;align-items: center;margin-bottom: 0.1rem;">
 							<span style="padding-left:0.2rem">实际收款金额：</span>
-							<div>
-								<span style="color:red">￥{{ EgouList.offline_total }}</span>+<span style="color:red">{{
+							<div class="flex">
+
+								<div v-if="vipCodeScore > EgouList.order_total_score">
+									<span style="color:red">￥{{
+										EgouList.offline_total - EgouList.order_total_score
+									}}</span>
+
+									+<span style="color:red">{{
 										EgouList.order_total_score
-								}}</span>积分+<span style="color:red">{{
-		EgouList.egou_total
-}}</span>E购月卡
+									}}</span>积分+
+								</div>
+								<div v-else>
+									<span style="color:red">￥{{ EgouList.offline_total - vipCodeScore }}</span>
+
+									+<span style="color:red">{{
+										vipCodeScore
+									}}</span>积分+
+								</div>
+
+
+
+								<span style="color:red">{{
+									EgouList.egou_total
+								}}</span>E购月卡
 							</div>
 						</div>
 						<div style="display:flex;align-items: center;">
@@ -412,8 +486,9 @@
 
 				</div>
 			</el-tab-pane>
-			<el-tab-pane name="user"><span slot="label"><i class="el-icon-user"></i>{{ login ?
-					$store.state.user.user_id
+			<el-tab-pane name="user"><span slot="label"><i class="el-icon-user"></i>{{
+				login?
+			$store.state.user.user_id
 					+ '(退出登录)' : '未登录'
 			}}</span>
 				<div class="login">
@@ -455,6 +530,7 @@ import {
 	cashierOrderPay,
 	setGoodsNum,
 	userInfo,
+	getUserInfo,
 	bindingUSERIC,
 	getMyGoodsList,
 	getShowlist,
@@ -462,7 +538,10 @@ import {
 	setBatchMyGoodsStockNum,
 	order_cart,
 	getImg,
-	getCashierOrderPayStatus
+	getCashierOrderPayStatus,
+	cancelCashierOrder,
+	clearAll,
+	getUserScore
 } from "@/api/user";
 import cookie from "vue-cookies";
 import getLodop from "@/api/lodop/LodopFuncs.js";
@@ -487,6 +566,8 @@ export default {
 		return {
 			cookieUserInfo: {},
 			focusStatus: false,
+			vipCodeScore: 0,
+			formShow: false,
 			detailedShow: true,
 			detailedIndex: 0,
 			stock_num: 1,
@@ -519,7 +600,11 @@ export default {
 			cartcode: '',
 			card_form: {
 				user_id: "",
-				ic: ""
+				nickname: '',
+				score: "",
+				egou: "",
+				mobile: "",
+				ic: "",
 			},
 			saomacartdata: [],
 			vipcode: '',
@@ -553,11 +638,65 @@ export default {
 			inputs: "", //条码扫码保存的数据
 			timearr: [0, 0],//扫条码记录间隔时长用来判断是不是扫码枪
 			isScanningGun: false,//判断是否扫码枪
-			timer: null
+			timer: null,
+			printArr: []
 		}
 	},
 	components: { DataManage },
 	methods: {
+		deleteCashiercart() {
+			clearAll().then((item) => {
+				console.log(item)
+				this.$toast('清除成功')
+				this.getlists()
+			})
+		},
+		card_reset() {
+			this.formShow = false
+			for (let key in this.card_form) {
+				this.card_form[key] = ''
+			}
+		},
+		getUserInfoButton() {
+			getUserInfo({ user_id: this.card_form.user_id }).then((item) => {
+				console.log(item.data)
+				this.formShow = true
+				this.card_form = {
+					user_id: item.data.id,
+					nickname: item.data.nickname,
+					mobile: item.data.mobile,
+					egou: (item.data.egou - item.data.egou_used).toFixed(2),
+					score: item.data.score_new,
+					ic: item.data.ic,
+				}
+				if (item.data.egou - item.data.egou_used < 0) {
+					this.card_form.egou = 0
+				}
+				if (item.data.score < 0) {
+					this.card_form.score = 0
+				}
+				// id
+				// nickname
+				// mobile
+				// item.data.egou - item.data.egou_used
+				// score
+				// card_no
+			})
+		},
+		cancelOrder(data) {
+			this.$confirm('此操作将永久删除该订单, 是否继续?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				console.log(data)
+				cancelCashierOrder({ id: data.id }).then((item) => {
+					this.$toast("删除成功");
+					this.getStoreCashierOrderList()
+				})
+			}).catch(() => {
+			});
+		},
 		barCodeInput() {
 			console.log(1)
 		},
@@ -578,6 +717,10 @@ export default {
 		},
 		passwordVisble() {
 			this.passworddialogVisible = true
+			console.log(1)
+			getUserScore({ ic: this.vipcode }).then((item) => {
+				this.vipCodeScore = item.data.score
+			})
 			clearInterval(this.timer)
 		},
 		inputChange() {
@@ -628,6 +771,10 @@ export default {
 			setMyGoodsStockNum(obj).then((item) => {
 				this.$toast(item.msg)
 			})
+			// let json_data=({ id: e.spec[0].goods_id, num: e.stock_num })
+			// setBatchMyGoodsStockNum({ json_data }).then((item) => {
+			// 	this.$toast(item.msg)
+			// })
 		},
 		stock_addShop() {
 			var that = this
@@ -693,9 +840,10 @@ export default {
 			this.detailedList = data
 		},
 		card_submit() {
-			bindingUSERIC(this.card_form).then((res) => {
+			bindingUSERIC({ user_id: this.card_form.user_id, ic: this.card_form.ic }).then((res) => {
 				this.$toast(res.msg);
 				this.card_form = {}
+				this.formShow = false
 			})
 		},
 		clickBarCode() {
@@ -738,12 +886,13 @@ export default {
 				this.$toast("请选择结算商品")
 			} else {
 				order_cart({ cart_type: 1, goodslist: this.seleinde }).then((res) => {
-					console.log(res)
 					cart({
 						cart_type: 1, goodslist: this.seleinde
 					}).then((ret) => {
-						console.log(ret)
+						this.show = true
+						this.orderNumber = ret.data
 						getImg({ pay_sn: ret.data }).then((item) => {
+							console.log(2)
 							this.qrcodeImage = process.env.VUE_APP_BASE_API + '/' + item.data.code_image
 							this.show = true
 							this.orderNumber = ret.data
@@ -762,6 +911,7 @@ export default {
 			getCashierOrderPayStatus({ pay_sn: pay }).then((item) => {
 				if (item.data == 20) {
 					clearInterval(this.timer)
+					this.timer = null
 					this.$toast("付款成功");
 					this.show = false
 					this.vipcode = ""
@@ -805,6 +955,7 @@ export default {
 		hhhh() {
 			this.getliststwo()
 			this.activeName = 'cart'
+			this.show = false
 		},
 		printReceipt(index) {
 			this.$confirm('是否要打印购物小票？', '提示', {
@@ -841,15 +992,29 @@ export default {
 					cancelButtonText: '取消',
 					type: 'sucssess'
 				}).then(() => {
-					this.PrintMytable()
-					this.AllDelete()
+					getStoreCashierOrderList({
+						is_page: 1,
+						dataType: 'all',
+						page: 1,
+						pageSize: 1,
+					}).then((item) => {
+						this.printArr = item.data.list[0]
+						setTimeout(() => {
+							this.PrintMytable()
+							this.AllDelete()
+						}, 500);
+					})
 					return
 				}).catch(() => {
 					this.AllDelete()
 				});
 				this.getStoreCashierOrderList()
 				this.activeName = 'order'
-			});
+			}).catch((err) => {
+				this.vipcode = ""
+				this.passwordInput = ""
+				this.passworddialogVisible = false
+			})
 		},
 		multiDelete() {
 			multiDelete({
@@ -1031,6 +1196,7 @@ export default {
 			return `购买时间:${year}-${month}-${dates} ${h}:${m}:${s}`
 		},
 		PrintMytable(goods, index) {
+			// 订单页面进入
 			if (goods) {
 				console.log(goods)
 				let LODOP;
@@ -1077,15 +1243,19 @@ export default {
 					LODOP.SET_PRINT_STYLEA(0, "FontSize", 8);
 				});
 				LODOP.ADD_PRINT_HTM(temp + 40, 10, 170, 25, `<div style="float:right;font-size:10px">总计:${parseInt(sumPrice)}</div>`);
+				LODOP.ADD_PRINT_HTM(temp + 60, 10, 170, 25, `<div style="font-size:10px">ID号:${this.order[index].user_id}</div>`);
+				LODOP.ADD_PRINT_HTM(temp + 80, 10, 170, 25, `<div style="font-size:10px">手机号:${this.order[index].user_mobile}</div>`);
+				LODOP.ADD_PRINT_HTM(temp + 100, 10, 170, 25, `<div style="font-size:10px">实际收款金额:￥${this.order[index].other_pay_info.offline - this.order[index].other_pay_info.use_score}+${this.order[index].other_pay_info.use_score}积分+${this.order[index].other_pay_info.egou}E购月卡</div>`);
 				LODOP.SET_PRINT_STYLEA(0, "FontSize", 6);
 				LODOP.SET_PRINTER_INDEX("按序号或名称指定打印机");//按序号或名称指定打印机，选定后禁止手工重选；
 				LODOP.PREVIEW()//打印预览
 				LODOP.PRINT()//直接打印
-				LODOP.PRINT_SETUP()//打印维护
-				LODOP.PRINT_DESIGN()//打印设计
-				LODOP.SET_PRINT_MODE("AUTO_CLOSE_PREWINDOW", 1)
+				// LODOP.PRINT_SETUP()//打印维护
+				// LODOP.PRINT_DESIGN()//打印设计
+				// LODOP.SET_PRINT_MODE("AUTO_CLOSE_PREWINDOW", 1)
 			} else {
 				let LODOP;
+				console.log(this.printArr)
 				LODOP = getLodop();
 				LODOP.PRINT_INIT("");
 				LODOP.ADD_PRINT_TEXT(10, 40, 300, 40, "丰德E购");
@@ -1129,13 +1299,16 @@ export default {
 					LODOP.SET_PRINT_STYLEA(0, "FontSize", 8);
 				});
 				LODOP.ADD_PRINT_HTM(temp + 40, 10, 170, 25, `<div style="float:right;font-size:10px">总计:${parseInt(sumPrice)}</div>`);
+				LODOP.ADD_PRINT_HTM(temp + 60, 10, 170, 25, `<div style="font-size:10px">ID号:${this.printArr.user_id}</div>`);
+				LODOP.ADD_PRINT_HTM(temp + 80, 10, 170, 25, `<div style="font-size:10px">手机号:${this.printArr.user_mobile}</div>`);
+				LODOP.ADD_PRINT_HTM(temp + 100, 10, 170, 25, `<div style="font-size:10px">实际收款金额:￥${this.printArr.other_pay_info.offline - this.printArr.other_pay_info.use_score}+${this.printArr.other_pay_info.use_score}积分+${this.printArr.other_pay_info.egou}E购月卡</div>`);
 				LODOP.SET_PRINT_STYLEA(0, "FontSize", 6);
 				LODOP.SET_PRINTER_INDEX("按序号或名称指定打印机");//按序号或名称指定打印机，选定后禁止手工重选；
 				LODOP.PREVIEW()//打印预览
 				LODOP.PRINT()//直接打印
-				LODOP.PRINT_SETUP()//打印维护
-				LODOP.PRINT_DESIGN()//打印设计
-				LODOP.SET_PRINT_MODE("AUTO_CLOSE_PREWINDOW", 1)
+				// LODOP.PRINT_SETUP()//打印维护
+				// LODOP.PRINT_DESIGN()//打印设计
+				// LODOP.SET_PRINT_MODE("AUTO_CLOSE_PREWINDOW", 1)
 			}
 		}
 	},
@@ -1204,8 +1377,12 @@ export default {
 		height: 3.5rem !important;
 	}
 
+	.saoma_add_tianjia {
+		margin-top: 0.1rem !important;
+	}
+
 	.saoma_input {
-		// margin-top: 0.2rem;
+		// margin-top: 0.4rem!important;
 		margin-bottom: 0.1rem !important;
 	}
 
@@ -1419,7 +1596,7 @@ export default {
 
 .taborder {
 	margin-left: 0.2rem;
-	margin-right: 5rem;
+	margin-right: 4rem;
 }
 
 .tabend {

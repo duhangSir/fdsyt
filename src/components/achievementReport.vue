@@ -1,12 +1,13 @@
 <template>
     <div style="width:100%;height: 100%;">
-        <div style="width:100%;height: 60%;box-sizing: border-box;" class="bg_fff p_2">
+        <div style="width:100%;height: 60%;box-sizing: border-box;" class="bg_fff p_2 mixinSix">
             <div class="flex space_between">
                 <div style="width: 50%;" class="flex align_items space_between ">
                     <div class="flex align_items">
                         <div class="sign mx_1"></div>
                         <span class="mr_1">业绩报表</span>
                         <div class="color_hui" style="font-size:0.14rem">最近更新时间：<span>{{ newDate }}</span></div>
+                        <el-button @click="dialogVisible = true">导出数据</el-button>
                     </div>
                     <div>
                         <el-date-picker class="filterDate" v-model="timeEveryDay" type="daterange" align="center"
@@ -63,6 +64,22 @@
             <div style="width: 100%;height: 150px;" id="echartsBar">
             </div>
         </div>
+        <el-dialog title="业绩报表" :visible.sync="dialogVisible" width="30%">
+            <div class="flex">
+
+                <el-date-picker class="filterDate" v-model="exceltimeEveryDay" type="daterange" align="center"
+                    start-placeholder="开始日期" :picker-options="pickerOptions" end-placeholder="结束日期"
+                    @change="excelFilterButton">
+                </el-date-picker>
+            </div>
+            <div class="mt_1 flex align_items">导出数量：<el-input v-model="excelInput" class="class"
+                    style="width:2rem"></el-input></div>
+            <span slot="footer" class="dialog-footer flex" style="justify-content: space-between;">
+                <!-- <el-button @click="dialogVisible = false">取 消</el-button> -->
+                <el-button @click="excelButton">确 定</el-button>
+                <el-button @click="excelShowButton" v-if="excelShow">导出数据</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 <script>
@@ -99,7 +116,12 @@ export default {
             startTime: '',
             endTime: '',
             startTimeEveryDay: '',
-            endTimeEveryDay: ''
+            endTimeEveryDay: '',
+            dialogVisible: false,
+            excelInput: 0,
+            excelShow: false,
+            excelData: [],
+            excelInput: 0,
         }
     },
     created() {
@@ -113,6 +135,60 @@ export default {
         this.getEverydayTotal()
     },
     methods: {
+
+        excelFilterButton(e) {
+            this.excelStartTime = this.getNewDateB(e[0])
+            this.excelEndTime = this.getNewDateB(e[1])
+        },
+        excelShowButton() {
+            const json_fields = [
+                {
+                    title: "日期",
+                    key: "time",
+                    type: "text",
+                },
+                {
+                    title: "日销售量(件)",
+                    key: "num",
+                    type: "text"
+                },
+                {
+                    title: "日销售额(元)",
+                    key: "price",
+                    type: "text"
+                }
+            ]
+            this.$JsonExcel(json_fields, this.excelData, '业绩报表 ')
+            setTimeout(() => {
+                this.excelShow = false
+            }, 2000);
+        },
+        excelButton() {
+            if (this.excelInput > 999) {
+                this.$Notify('导出数量不能超过1000')
+                return
+            }
+            let myreg = /^([0-9]{1,}[.][0-9]*)$/;
+            let myreg2 = /^([0-9]{1,})$/;
+            if (!myreg.test(this.excelInput) && !myreg2.test(this.excelInput)) {
+                this.excelInput = 0;
+                this.$Notify('请输入正确的导出数量')
+                return
+            }
+            const obj = {
+                page: 1,
+                start_time: this.excelStartTime,
+                end_time: this.excelEndTime,
+                pageSize: this.excelInput
+            }
+            getEverydayList(obj).then((item) => {
+                this.excelData = item.data.list
+                this.excelData.forEach((toItem) => {
+                    toItem.time = this.getNewDateB(toItem.time * 1000)
+                })
+                this.excelShow = true
+            })
+        },
         filterTime(val) {
             this.startTime = this.getNewDateB(val[0])
             this.endTime = this.getNewDateB(val[1])
@@ -385,6 +461,10 @@ export default {
 
     #echartsPie {
         height: 2.5rem !important;
+    }
+
+    .mixinSix {
+        height: 50% !important;
     }
 }
 
